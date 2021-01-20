@@ -1,25 +1,44 @@
-import logo from './logo.svg';
 import './App.css';
+import React, { useEffect } from 'react';
+import { loadUnits } from './redux/actions';
+import { connect} from 'react-redux'
+import MultiRacial from './components/multiracial';
+import {
+  unitsLoadingSelector,
+  unitsLoadedSelector,
+  unitsLoadingErrorSelector,
+} from './redux/reducer/selectors'
 
-function App() {
+import { Route } from 'react-router-dom';
+import Loader from './components/loader';
+import AddUnit from './components/addunit'
+import styles from './app.module.css';
+
+function App({
+  loadUnits, 
+  loading, 
+  loaded, 
+  error
+}) {
+  useEffect(() => {
+    if (!loaded) loadUnits();
+  }, []) //eslint-disable-line
+  if (loading || !loaded) return <Loader />;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={styles.main}>
+      <Route path="/" exact component={MultiRacial}></Route>
+      <Route path="/:race" exact component={AddUnit}></Route>
     </div>
   );
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    loading: unitsLoadingSelector(state),
+    loaded: unitsLoadedSelector(state),
+    error: unitsLoadingErrorSelector(state),
+  };
+};
+
+export default connect(mapStateToProps, { loadUnits })(App);
